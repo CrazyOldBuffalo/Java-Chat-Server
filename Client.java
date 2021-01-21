@@ -9,7 +9,12 @@ public class Client {
     public static void main(String[] args) {
         int port = 12345;
         try {
-            Socket clientSocket = ClientSocketBuilder(port);  
+            Socket clientSocket = ClientSocketBuilder(port);
+            if (clientSocket.isConnected())
+            {
+                System.out.println("Connected To Server Successfully");
+                ClientMenu.Menu(clientSocket);
+            }
         }
         catch (IOException ClientSocketIOE)
         {
