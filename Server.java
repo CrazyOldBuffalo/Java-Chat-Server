@@ -3,15 +3,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 
 public class Server {
     public static void main(String[] args) {
         int port = 12345;
+        Socket clientSocket = null;
         try
         {
             ServerSocket serverSocket = ServerBuilder(port);
-            CheckConnections(serverSocket);
+            CheckConnections(serverSocket, clientSocket);
         }
         catch (IOException serverSocketIOE)
         {
@@ -20,16 +23,16 @@ public class Server {
         }
     }
 
-    private static ServerSocket ServerBuilder(int port) throws IOException{
-        return new ServerSocket(port);
-    }
-
-    private static void CheckConnections(ServerSocket serverSocket) throws IOException{
+    private static void CheckConnections(ServerSocket serverSocket, Socket clientSocket) throws IOException{
         while (true)
         {
             try {
-                Socket clientSocket = serverSocket.accept();
+                clientSocket = serverSocket.accept();
                 System.out.println("Client Connected");
+                DataInputStream inputStream = DataInputBuilder(clientSocket);
+                DataOutputStream outputStream = DataOutputBuilder(clientSocket);
+
+                Thread clientThread = ClientThreadHandler();
             }
             catch (IOException cIoException)
             {
@@ -37,5 +40,23 @@ public class Server {
                 System.exit(1);
             }
         }
+    }
+
+
+    private static Thread ClientThreadHandler() {
+        return null;
+    }
+
+    private static DataOutputStream DataOutputBuilder(Socket clientSocket) throws IOException {
+        return new DataOutputStream(clientSocket.getOutputStream());
+    }
+
+    private static DataInputStream DataInputBuilder(Socket clientSocket) throws IOException {
+        return new DataInputStream(clientSocket.getInputStream());
+    }
+
+    // Private Methods for Building and returning the server socket
+    private static ServerSocket ServerBuilder(int port) throws IOException{
+        return new ServerSocket(port);
     }
 }
