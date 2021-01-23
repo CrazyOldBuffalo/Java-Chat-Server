@@ -1,4 +1,5 @@
 import java.net.UnknownHostException;
+import java.util.Vector;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
@@ -8,6 +9,8 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 
 public class Server {
+
+    static Vector<ClientHandler> clientHandlerVector = ClientHandlerVectorBuilder();
     public static void main(String[] args) {
         int port = 12345;
         Socket clientSocket = null;
@@ -23,6 +26,10 @@ public class Server {
         }
     }
 
+    private static Vector<ClientHandler> ClientHandlerVectorBuilder() {
+        return new Vector<ClientHandler>();
+    }
+
     private static void CheckConnections(ServerSocket serverSocket, Socket clientSocket) throws IOException{
         while (true)
         {
@@ -31,7 +38,7 @@ public class Server {
                 System.out.println("Client Connected");
                 DataInputStream inputStream = DataInputBuilder(clientSocket);
                 DataOutputStream outputStream = DataOutputBuilder(clientSocket);
-
+                ClientHandler ServerClientHandler = new ClientHandler(clientSocket, inputStream, outputStream);
                 Thread clientThread = ClientThreadHandler();
             }
             catch (IOException cIoException)

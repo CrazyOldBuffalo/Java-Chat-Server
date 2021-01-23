@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 public class Client {
+
     public static void main(String[] args) {
+
         int port = 12345;
         try {
             Socket clientSocket = ClientSocketBuilder(port);
@@ -26,4 +29,5 @@ public class Client {
     private static Socket ClientSocketBuilder(int port) throws IOException{
         return new Socket("localhost", port);
     }
+
 }
