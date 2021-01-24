@@ -15,11 +15,11 @@ public class ClientMenu {
         Scanner clientMenuInput = ClientMenuScanner();
         try{
             String clientMenuChoice = clientMenuInput.nextLine();
-            if (clientMenuChoice.toUpperCase() == "D")
+            if (clientMenuChoice.equalsIgnoreCase("D"))
             {
                 clientSocket.close();
             }
-            if (clientMenuChoice.toUpperCase() == "O")
+            if (clientMenuChoice.equalsIgnoreCase("O"))
             {
                 System.out.println("Please Enter a Name for the channel");
             }

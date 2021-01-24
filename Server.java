@@ -1,28 +1,28 @@
-import java.net.UnknownHostException;
 import java.util.Vector;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.InputStreamReader;
 
 public class Server {
 
     static Vector<ClientHandler> clientHandlerVector = ClientHandlerVectorBuilder();
+    static int i = 0;
     public static void main(String[] args) {
         int port = 12345;
         Socket clientSocket = null;
-        try
-        {
-            ServerSocket serverSocket = ServerBuilder(port);
-            CheckConnections(serverSocket, clientSocket);
-        }
-        catch (IOException serverSocketIOE)
-        {
-            System.err.println("Failed to Listen On " + port);
-            System.exit(1);
+        while (true) {
+            try
+            {
+                ServerSocket serverSocket = ServerBuilder(port);
+                CheckConnections(serverSocket, clientSocket);
+            }
+            catch (IOException serverSocketIOE)
+            {
+                System.err.println("Failed to Listen On " + port);
+                System.exit(1);
+            }
         }
     }
 
@@ -38,8 +38,11 @@ public class Server {
                 System.out.println("Client Connected");
                 DataInputStream inputStream = DataInputBuilder(clientSocket);
                 DataOutputStream outputStream = DataOutputBuilder(clientSocket);
-                ClientHandler ServerClientHandler = new ClientHandler(clientSocket, inputStream, outputStream);
-                Thread clientThread = ClientThreadHandler();
+                ClientHandler serverClientHandler = ClientHandlerBuilder(clientSocket, i, inputStream, outputStream);
+                Thread clientThread = new Thread(serverClientHandler);
+                clientHandlerVector.add(serverClientHandler);
+                clientThread.start();
+                i++;
             }
             catch (IOException cIoException)
             {
@@ -48,10 +51,10 @@ public class Server {
             }
         }
     }
-
-
-    private static Thread ClientThreadHandler() {
-        return null;
+    
+    private static ClientHandler ClientHandlerBuilder(Socket clientSocket, int i, DataInputStream inputStream, DataOutputStream outputStream)
+    {
+        return new ClientHandler(clientSocket, "Client" + i, inputStream, outputStream);
     }
 
     private static DataOutputStream DataOutputBuilder(Socket clientSocket) throws IOException {
