@@ -1,72 +1,42 @@
-import java.util.Vector;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.IOException;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.util.ArrayList;
 
 public class Server {
 
-    static Vector<ClientHandler> clientHandlerVector = ClientHandlerVectorBuilder();
-    static int i = 0;
-    public static void main(String[] args) {
-        int port = 12345;
-        Socket clientSocket = null;
-        while (true) {
-            try
-            {
-                ServerSocket serverSocket = ServerBuilder(port);
-                CheckConnections(serverSocket, clientSocket);
+    // Private Variables for establishing Server, Port which is set to 12345 will ensure the port always opens to this number,
+    // The ArrayList allows for each thread to be stored within it and removed when a client disconnects from the server.
+    private static int port = 12345;
+    private static ArrayList<ClientHandler> clientThreads = new ArrayList<>();
+
+
+    private static void BuildServer() {
+        try {
+            ServerSocket serverSocket = ServerSocketBuilder();
+            while (true) {
+                Socket clientSocket = ClientSocketBuilder(serverSocket);
+                ClientHandler client = new ClientHandler(clientSocket, Client.getClientName());
+                clientThreads.add(client);
+                client.start();
             }
-            catch (IOException serverSocketIOE)
-            {
-                System.err.println("Failed to Listen On " + port);
-                System.exit(1);
-            }
+        }
+        catch (IOException ServerIOException) {
+            System.err.println("Server Failed to Build, Exiting");
+            System.exit(1);
         }
     }
 
-    private static Vector<ClientHandler> ClientHandlerVectorBuilder() {
-        return new Vector<ClientHandler>();
+    private static Socket ClientSocketBuilder(ServerSocket serverSocket) throws IOException{
+        return serverSocket.accept();
     }
 
-    private static void CheckConnections(ServerSocket serverSocket, Socket clientSocket) throws IOException{
-        while (true)
-        {
-            try {
-                clientSocket = serverSocket.accept();
-                System.out.println("Client Connected");
-                DataInputStream inputStream = DataInputBuilder(clientSocket);
-                DataOutputStream outputStream = DataOutputBuilder(clientSocket);
-                ClientHandler serverClientHandler = ClientHandlerBuilder(clientSocket, i, inputStream, outputStream);
-                Thread clientThread = new Thread(serverClientHandler);
-                clientHandlerVector.add(serverClientHandler);
-                clientThread.start();
-                i++;
-            }
-            catch (IOException cIoException)
-            {
-                System.err.println("Connection to Server Failed, Exiting");
-                System.exit(1);
-            }
-        }
-    }
-    
-    private static ClientHandler ClientHandlerBuilder(Socket clientSocket, int i, DataInputStream inputStream, DataOutputStream outputStream)
-    {
-        return new ClientHandler(clientSocket, "Client" + i, inputStream, outputStream);
-    }
-
-    private static DataOutputStream DataOutputBuilder(Socket clientSocket) throws IOException {
-        return new DataOutputStream(clientSocket.getOutputStream());
-    }
-
-    private static DataInputStream DataInputBuilder(Socket clientSocket) throws IOException {
-        return new DataInputStream(clientSocket.getInputStream());
-    }
-
-    // Private Methods for Building and returning the server socket
-    private static ServerSocket ServerBuilder(int port) throws IOException{
+    private static ServerSocket ServerSocketBuilder() throws IOException {
         return new ServerSocket(port);
     }
+
+    public static void main(String[] args) {
+        BuildServer();
+    }
+    
 }
