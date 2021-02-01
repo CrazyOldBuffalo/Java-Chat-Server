@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import org.json.simple.*;
 
 public class ClientHandler extends Thread{
     private Socket clientSocket;
@@ -31,6 +32,7 @@ public class ClientHandler extends Thread{
         try {
             String message;
                 while((message = clientReader.readLine()) != null) {
+                    Object jsonObject = JSONValue.parse(message);
                     System.out.println("Message Recieved from Client");
                     clientWriter.write(message);
                 }
