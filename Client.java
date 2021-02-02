@@ -1,83 +1,60 @@
-import java.net.Socket;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
-public class Client{
+public class Client {
+
+    private static String hostName = "localhost";
     private static int port = 12345;
-    private static String hostname = "localhost";
-    private static String clientName;
-
-    public Client(String clientName) {
-        this.port = port;
-        this.hostname = hostname;
-        this.clientName = clientName;
-    }
 
     public static void main(String[] args) {
-        Client client = new Client(ClientUsername());
-        clientSetup();
+        ClientBuilder();
     }
 
-    private static String ClientUsername() {
-        Scanner clientUsernameScanner = ClientScannerBuilder();
-        System.out.println("Please Enter Your Username:" + "\n");
-        String clientName = clientUsernameScanner.nextLine();
-        return clientName;
+    private static void HandleInput(PrintWriter clientOut, BufferedReader clientIn, BufferedReader clientStdIn)
+            throws IOException {
+        String clientInput;
+        while ((clientInput = clientStdIn.readLine()) != null) {
+            clientOut.println(clientInput);
+            System.out.println("Says: " + clientIn.readLine());
+        }
     }
-    private static void clientSetup() {
+
+    private static void ClientBuilder() {
         try {
-            Socket clientSocket = clientSocketBuilder();
-            PrintWriter clientOutput = clientOutputBuilder(clientSocket);
-            BufferedReader clientInput = clientInputBuilder(clientSocket);
-            BufferedReader userInput = userInputBuilder();
-            HandleInput(clientOutput, clientInput, userInput, clientSocket);
+            Socket clientSocket = ClientSocketBuilder();
+            PrintWriter clientOut = ClientPrintWriterBuilder(clientSocket);
+            BufferedReader clientIn = ClientBufferedReaderBuilder(clientSocket);
+            BufferedReader clientStdIn = ClientStdInBuilder();
+            HandleInput(clientOut, clientIn, clientStdIn);
         }
-        catch (UnknownHostException clientUHException)
-        {
-            System.err.println("Error Establishing Connection to Host, Exiting");
+        catch (UnknownHostException e) {
+            System.err.println("Don't know about host " + hostName);
             System.exit(1);
-        }
-        catch (IOException clientIOException)
-        {
-            System.err.println("Error Occurred With I/O, Exiting");
+        } 
+        catch (IOException e) {
+            System.err.println("Couldn't get I/O for the connection to " +
+            hostName);
             System.exit(1);
-        }
+        }    
     }
 
-    private static void HandleInput(PrintWriter clientOutput, BufferedReader clientInput, BufferedReader userInput, Socket clientSocket) throws IOException{
-        String message;
-        while((message = userInput.readLine()) != null) {
-            clientOutput.println(message);
-            System.out.println(Client.getClientName() + " Says: " + message);
-        }
-    }
-
-    private static Scanner ClientScannerBuilder() {
-        return new Scanner(System.in);
-    }
-
-    private static Socket clientSocketBuilder() throws IOException{
-        return new Socket(hostname, port);   
-    }
-
-    private static PrintWriter clientOutputBuilder(Socket clientSocket) throws IOException{
-        return new PrintWriter(clientSocket.getOutputStream(), true);
-    }
-
-    private static BufferedReader clientInputBuilder(Socket clientSocket) throws IOException {
-        return new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-    }
-
-    private static BufferedReader userInputBuilder() throws IOException {
+    private static BufferedReader ClientStdInBuilder() {
         return new BufferedReader(new InputStreamReader(System.in));
     }
 
-    public static String getClientName() {
-        return clientName;
+    private static BufferedReader ClientBufferedReaderBuilder(Socket clientSocket) throws IOException {
+        return new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
-    
-} 
+
+    private static PrintWriter ClientPrintWriterBuilder(Socket clientSocket) throws IOException {
+        return new PrintWriter(clientSocket.getOutputStream(), true);
+    }
+
+    private static Socket ClientSocketBuilder() throws UnknownHostException, IOException {
+        return new Socket(hostName, port);
+    }
+}
