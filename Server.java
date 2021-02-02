@@ -1,41 +1,32 @@
-import java.net.UnknownHostException;
+
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.net.*;
+import java.io.*;
+import org.json.simple.*;  // required for JSON encoding and decoding
 
 public class Server {
+    private static int port = 12345;
+
     public static void main(String[] args) {
-        int port = 12345;
-        try
-        {
-            ServerSocket serverSocket = ServerBuilder(port);
-            CheckConnections(serverSocket);
-        }
-        catch (IOException serverSocketIOE)
-        {
-            System.err.println("Failed to Listen On " + port);
+        BuildServer();
+    }
+
+    private static void BuildServer() {
+        try {
+            ServerSocket serverSocket = ServerSocketBuilder();
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Client Connected Successfully");
+                new ClientHandler(clientSocket, "client").start();
+            }
+        } 
+        catch (IOException serverIOException) {
+            System.err.println("Failed to Setup Server, Exiting");
             System.exit(1);
         }
     }
 
-    private static ServerSocket ServerBuilder(int port) throws IOException{
+    private static ServerSocket ServerSocketBuilder() throws IOException {
         return new ServerSocket(port);
-    }
-
-    private static void CheckConnections(ServerSocket serverSocket) throws IOException{
-        while (true)
-        {
-            try {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Client Connected");
-            }
-            catch (IOException cIoException)
-            {
-                System.err.println("Connection to Server Failed, Exiting");
-                System.exit(1);
-            }
-        }
     }
 }
