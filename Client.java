@@ -4,57 +4,65 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+import org.json.simple.*;
 
 public class Client {
 
-    private static String hostName = "localhost";
-    private static int port = 12345;
+    private String hostName = "localhost";
+    private int port = 12345;
+
 
     public static void main(String[] args) {
-        ClientBuilder();
-    }
-
-    private static void HandleInput(PrintWriter clientOut, BufferedReader clientIn, BufferedReader clientStdIn)
-            throws IOException {
-        String clientInput;
-        while ((clientInput = clientStdIn.readLine()) != null) {
-            clientOut.println(clientInput);
-            System.out.println("Says: " + clientIn.readLine());
-        }
-    }
-
-    private static void ClientBuilder() {
         try {
-            Socket clientSocket = ClientSocketBuilder();
-            PrintWriter clientOut = ClientPrintWriterBuilder(clientSocket);
-            BufferedReader clientIn = ClientBufferedReaderBuilder(clientSocket);
-            BufferedReader clientStdIn = ClientStdInBuilder();
-            HandleInput(clientOut, clientIn, clientStdIn);
+            Client client = new Client();
+            Socket clientSocket = client.ClientSocketBuilder();
+            PrintWriter clientOutput = client.ClientPrintWriterBuilder(clientSocket);
+            Scanner clientInput = client.ClientScannerBuilder(clientSocket);
+            BufferedReader clientStdIn = client.ClientBufferedReaderBuilder();
+            client.HandleInput(clientOutput, clientInput, clientStdIn);
         }
-        catch (UnknownHostException e) {
-            System.err.println("Don't know about host " + hostName);
+        catch (UnknownHostException clientUnknownHostException) {
+            System.err.println("Unable to find Host, Exiting");
             System.exit(1);
         } 
-        catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to " +
-            hostName);
+        catch (IOException clientIOException) {
+            System.err.println("Failed to Setup IO, Exiting");
             System.exit(1);
-        }    
+        } 
+        catch (NoSuchElementException clientNSElementException) {
+            System.err.println("Test");
+        }
     }
 
-    private static BufferedReader ClientStdInBuilder() {
+    private void HandleInput(PrintWriter clientOutput, Scanner clientInput, BufferedReader clientStdIn)
+            throws IOException {
+        String userInput;
+        while ((userInput = clientStdIn.readLine()) != null) {
+            clientOutput.println(userInput);
+            int n = clientInput.nextInt();
+            clientInput.nextLine();
+            for (int i = 0; i < n; i++) {
+                System.out.println(clientInput.nextLine());
+            }
+        }   
+    }
+
+    private BufferedReader ClientBufferedReaderBuilder() {
         return new BufferedReader(new InputStreamReader(System.in));
     }
 
-    private static BufferedReader ClientBufferedReaderBuilder(Socket clientSocket) throws IOException {
-        return new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    private Scanner ClientScannerBuilder(Socket clientSocket) throws IOException {
+        return new Scanner(clientSocket.getInputStream());
     }
 
-    private static PrintWriter ClientPrintWriterBuilder(Socket clientSocket) throws IOException {
-        return new PrintWriter(clientSocket.getOutputStream(), true);
-    }
-
-    private static Socket ClientSocketBuilder() throws UnknownHostException, IOException {
+    private Socket ClientSocketBuilder() throws IOException {
         return new Socket(hostName, port);
+    }
+
+    private PrintWriter ClientPrintWriterBuilder(Socket clientSocket) throws IOException {
+        return new PrintWriter(clientSocket.getOutputStream(), true);
     }
 }

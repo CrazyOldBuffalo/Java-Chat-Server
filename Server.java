@@ -1,32 +1,48 @@
-
+import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.*;
-import java.io.*;
-import org.json.simple.*;  // required for JSON encoding and decoding
+import java.net.Socket;
+import java.util.ArrayList;
 
 public class Server {
-    private static int port = 12345;
 
-    public static void main(String[] args) {
-        BuildServer();
-    }
+    private int portNumber = 12345;
+    private ArrayList<ClientHandler> clientThreads = new ArrayList<>();
 
-    private static void BuildServer() {
+    public static void main(String[] args) throws IOException {
+        Server server = new Server();
         try {
-            ServerSocket serverSocket = ServerSocketBuilder();
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Client Connected Successfully");
-                new ClientHandler(clientSocket, "client").start();
-            }
-        } 
-        catch (IOException serverIOException) {
-            System.err.println("Failed to Setup Server, Exiting");
+            ServerSocket serverSocket = server.serverSocketBuilder();
+            server.AcceptConnections(serverSocket);
+        }
+        catch (IOException e) {
+            System.err.println("Error Occurred when Listening on port, Exiting");
             System.exit(1);
         }
     }
 
-    private static ServerSocket ServerSocketBuilder() throws IOException {
-        return new ServerSocket(port);
+    private ServerSocket serverSocketBuilder() throws IOException {
+        return new ServerSocket(portNumber);
+    }
+
+    private void AcceptConnections(ServerSocket serverSocket) throws IOException {
+        int number = 0;
+        while (true)
+        {
+           Socket clientSocket = serverSocket.accept();
+           number++;
+           ClientHandler clientHandler = new ClientHandler(clientSocket, this);
+           clientThreads.add(clientHandler);
+           clientHandler.start();
+        }
+    }
+
+    public void EndConnection(ClientHandler clientHandler, Socket clientSocket) {
+        try {
+            clientThreads.remove(clientHandler);
+            clientSocket.close();
+        }
+        catch (IOException clientIOException) {
+            System.err.println("Error in Closing Client Connection");
+        }
     }
 }
