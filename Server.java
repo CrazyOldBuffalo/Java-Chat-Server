@@ -25,11 +25,9 @@ public class Server {
     }
 
     private void AcceptConnections(ServerSocket serverSocket) throws IOException {
-        int number = 0;
         while (true)
         {
            Socket clientSocket = serverSocket.accept();
-           number++;
            ClientHandler clientHandler = new ClientHandler(clientSocket, this);
            clientThreads.add(clientHandler);
            clientHandler.start();

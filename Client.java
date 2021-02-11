@@ -7,8 +7,6 @@ import java.net.UnknownHostException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import org.json.simple.*;
-
 public class Client {
 
     private String hostName = "localhost";

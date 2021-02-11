@@ -1,6 +1,3 @@
-
-import java.util.Calendar;
-
 import org.json.simple.*;
 
 public class Message {
@@ -21,7 +18,7 @@ public class Message {
     }
 
     public String getDate() {
-        return date.toString();
+        return date;
     }
 
     public String getClientName() {
