@@ -20,6 +20,7 @@ public class Client {
             PrintWriter clientOutput = client.ClientPrintWriterBuilder(clientSocket);
             Scanner clientInput = client.ClientScannerBuilder(clientSocket);
             BufferedReader clientStdIn = client.ClientBufferedReaderBuilder();
+            client.WelcomeMessage();
             client.HandleInput(clientOutput, clientInput, clientStdIn);
         }
         catch (UnknownHostException clientUnknownHostException) {
@@ -31,8 +32,14 @@ public class Client {
             System.exit(1);
         } 
         catch (NoSuchElementException clientNSElementException) {
-            System.err.println("Test");
+            System.err.println("Connection to Server has Been Closed");
+            System.exit(1);
         }
+    }
+
+    private void WelcomeMessage() {
+        System.out.println("Welcome to the Server, Before Starting Set Your Name with the Command: " + "name " + "Followed by you username");
+        System.out.println("For More Commands & Their Usage type: help");
     }
 
     private void HandleInput(PrintWriter clientOutput, Scanner clientInput, BufferedReader clientStdIn)

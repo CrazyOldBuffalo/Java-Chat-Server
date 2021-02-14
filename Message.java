@@ -1,12 +1,14 @@
 import org.json.simple.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Message {
     private static final String CLASS = Message.class.getSimpleName();
     private String message;
     private String clientName;
     private String date;
-    
-    
+
     public Message(String sclientName, String smessage, String sdate) {
         this.clientName = sclientName;
         this.message = smessage;
@@ -31,7 +33,7 @@ public class Message {
         json.put("_class", CLASS);
         json.put("clientName", clientName);
         json.put("Message", message);
-        json.put("Date", date);
+        json.put("Date", date);        
         return json;
     }
 }
