@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,10 +11,6 @@ import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Map;
-
-
 
 public class ClientHandler extends Thread {
     private Socket client;
@@ -114,7 +109,7 @@ public class ClientHandler extends Thread {
         }
         toClient.println(archive.size());
         for (Message ames : archive) {
-            toClient.println(ames.getClientName() + " Says: " + ames.getMessage() + " On [ " + ames.getDate() + " ]");
+            toClient.println(ames.getClientName() + " Says: " + ames.getMessage() + "\n" + " On [ " + ames.getDate() + " ]");
         }
         
     }
@@ -144,7 +139,7 @@ public class ClientHandler extends Thread {
     private void ReadMessages(int unread) {
         toClient.println(open.size() - unread);
         for (int i = unread; i < open.size(); i++) {
-            toClient.println(open.get(i).getClientName() + " Says: " + open.get(i).getMessage() + " on " + open.get(i).getDate());
+            toClient.println(open.get(i).getClientName() + " Says: " + open.get(i).getMessage() + " On " + "\n" + open.get(i).getDate());
         }
    } 
 
