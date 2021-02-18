@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.io.FileWriter;
@@ -22,6 +23,8 @@ public class ClientHandler extends Thread {
     private static ArrayList<Message> open = new ArrayList<>();
     private static ArrayList<Message> archive = new ArrayList<>();
     private static ArrayList<String> clientNames = new ArrayList<>();
+    private static Request Request = new Request();
+    private static HashMap<String, Board> boards = new HashMap<>();
 
 
     public ClientHandler(Socket clientSocket, Server server) throws IOException{
@@ -49,6 +52,9 @@ public class ClientHandler extends Thread {
                 String room = "";
                 try {
                         command  = clientHandlerScanner.next();
+                        if (command.equalsIgnoreCase("post")) {
+                            room = clientHandlerScanner.skip(" ").next();
+                        }
                         argument = clientHandlerScanner.skip(" ").nextLine();
                 } 
                 catch (NoSuchElementException e) {
@@ -60,13 +66,51 @@ public class ClientHandler extends Thread {
                     }
                 }
                 else if ((command.equalsIgnoreCase("post") || command.equalsIgnoreCase("p")) && argument.length() > 1) {
-                    synchronized(ClientHandler.class) {
-                        PostMessage(argument);
+                    if (argument.length() > 25) {
+                        toClient.println(1);
+                        toClient.println("Too Many Characters, max = 25");
+                    }
+                    else if (room.equalsIgnoreCase("global")){
+                        synchronized(ClientHandler.class) {
+                            PostMessage(argument);
+                        }
+                    }
+                    else if (boards.containsKey(room)) {
+                        if (boards.get(room).Subscribed(clientName)) {
+                            synchronized(ClientHandler.class) {
+                                Date date = new Date();
+                                SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                                Message json = new Message(clientName, argument, format.format(date));
+                                boards.get(room).RoomPost(json);
+                                toClient.println(1);
+                                toClient.println("Posted to Board " + room);
+                            }
+                        }
+                        else {
+                            toClient.println(1);
+                            toClient.println("You're not Subscribed, please subscribe to Post & Read to Channel " + room);
+                        }
                     }
                 }
                 else if ((command.equalsIgnoreCase("read") || command.equalsIgnoreCase("r")) && argument.length() == 0) {
                     ReadMessages(unread);
                     unread = open.size();
+                }
+                else if (command.equalsIgnoreCase("open") && argument.length() > 1) {
+                    boards.put(argument, new Board(argument, clientName));
+                    toClient.println(1);
+                    toClient.println("Board " + argument + " Created");
+                }
+                else if (command.equalsIgnoreCase("sub") && argument.length() > 1) {
+                        if (boards.containsKey(argument)) {
+                            boards.get(argument).AddClient(clientName);
+                            toClient.println(1);
+                            toClient.println("Board " + argument + " Subscribed");
+                        }
+                        else {
+                            toClient.println(1);
+                            toClient.println("Board Doesn't Exist");
+                        }
                 }
                 else if (command.equalsIgnoreCase("archive") || command.equalsIgnoreCase("a")) {
                     ReadArchive();
@@ -89,10 +133,6 @@ public class ClientHandler extends Thread {
         }
     }
 
-    public String clientName() {
-        return clientName;
-    }
-
     private void ReadArchive() throws IOException {
         BufferedReader fr = new BufferedReader(new FileReader("main.txt"));
         String line = null;
@@ -105,11 +145,10 @@ public class ClientHandler extends Thread {
             String time = archives[3];
             Message archiveJson = new Message(username, Message, date + " " + time);
             archive.add(archiveJson);
-
         }
         toClient.println(archive.size());
         for (Message ames : archive) {
-            toClient.println(ames.getClientName() + " Says: " + ames.getMessage() + "\n" + " On [ " + ames.getDate() + " ]");
+            toClient.println(ames.getClientName() + " Says: " + ames.getMessage() + " On [ " + ames.getDate() + " ]");
         }
         
     }
@@ -139,13 +178,12 @@ public class ClientHandler extends Thread {
     private void ReadMessages(int unread) {
         toClient.println(open.size() - unread);
         for (int i = unread; i < open.size(); i++) {
-            toClient.println(open.get(i).getClientName() + " Says: " + open.get(i).getMessage() + " On " + "\n" + open.get(i).getDate());
+            toClient.println(open.get(i).getClientName() + " Says: " + open.get(i).getMessage() + " On [ " + open.get(i).getDate() + " ]");
         }
    } 
 
     private void PostMessage(String argument) throws IOException{
         FileWriter fWriter = new FileWriter(file, true);
-        System.out.println("File Created");
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Message json = new Message(clientName, argument, format.format(date));
