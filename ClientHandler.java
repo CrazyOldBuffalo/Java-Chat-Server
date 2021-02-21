@@ -52,7 +52,7 @@ public class ClientHandler extends Thread {
                 String room = "";
                 try {
                         command  = clientHandlerScanner.next();
-                        if (command.equalsIgnoreCase("post")) {
+                        if (command.equalsIgnoreCase("postto") || command.equalsIgnoreCase("readfrom")) {
                             room = clientHandlerScanner.skip(" ").next();
                         }
                         argument = clientHandlerScanner.skip(" ").nextLine();
@@ -70,18 +70,21 @@ public class ClientHandler extends Thread {
                         toClient.println(1);
                         toClient.println("Too Many Characters, max = 25");
                     }
-                    else if (room.equalsIgnoreCase("global")){
+                    else {
                         synchronized(ClientHandler.class) {
                             PostMessage(argument);
                         }
                     }
+                }
+                else if ((command.equalsIgnoreCase("postto") || command.equalsIgnoreCase("pt")) && (room.length() > 1 && argument.length() > 1)) {
+                    if (argument.length() > 25) {
+                        toClient.println(1);
+                        toClient.println("Too Many Characters, max = 25");
+                    }
                     else if (boards.containsKey(room)) {
                         if (boards.get(room).Subscribed(clientName)) {
                             synchronized(ClientHandler.class) {
-                                Date date = new Date();
-                                SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                                Message json = new Message(clientName, argument, format.format(date));
-                                boards.get(room).RoomPost(json);
+                                boards.get(room).RoomPost(clientName, argument);
                                 toClient.println(1);
                                 toClient.println("Posted to Board " + room);
                             }
@@ -92,9 +95,26 @@ public class ClientHandler extends Thread {
                         }
                     }
                 }
-                else if ((command.equalsIgnoreCase("read") || command.equalsIgnoreCase("r")) && argument.length() == 0) {
-                    ReadMessages(unread);
-                    unread = open.size();
+                else if ((command.equalsIgnoreCase("read") || command.equalsIgnoreCase("r"))) {
+                    if (argument.length() == 0) {
+                        ReadMessages(unread);
+                        unread = open.size();
+                    }
+                    else if (argument.length() > 0) {
+                        if(boards.containsKey(argument)) {
+                            if(boards.get(argument).Subscribed(clientName)) {
+                                ArrayList<Message> roomboard = boards.get(argument).ReadRoom();
+                                toClient.println(boards.get(argument).GetMessageCount());
+                                for (Message msg: roomboard) {
+                                   toClient.println(msg.getClientName() + " Says: " + msg.getMessage() + " on " + msg.getDate());
+                                }
+                            }
+                            else {
+                                toClient.println(1);
+                                toClient.println("You're not Subscribed, please subscribe to Post & Read to Channel" + argument);
+                            }
+                        }
+                    }
                 }
                 else if (command.equalsIgnoreCase("open") && argument.length() > 1) {
                     boards.put(argument, new Board(argument, clientName));
@@ -150,7 +170,7 @@ public class ClientHandler extends Thread {
         for (Message ames : archive) {
             toClient.println(ames.getClientName() + " Says: " + ames.getMessage() + " On [ " + ames.getDate() + " ]");
         }
-        
+        fr.close();
     }
 
     private String[] parse(String line) {
@@ -160,7 +180,7 @@ public class ClientHandler extends Thread {
     private void Help() {
         toClient.println(4);
         toClient.println("name/n - For Setting your UserName, follow this with your specified username.      e.g: name Harry");
-        toClient.println("post/p - To Post a Message to the MessageBoard, follow this with your message.     e.g: post Hello There");
+        toClient.println("post/p - To Post a Message to the MessageBoard: to Post to A room enter the roomname to post to the Default Room Enter Global, follow this with your message.     e.g: post global Hello There");
         toClient.println("read/r - To Read all Posted Messages on the server.                                e.g: read");
         toClient.println("archive/a - Read all Stored Messages from the archive.                             e.g: archive");
         toClient.println("quit/q - To Exit from the server.                                                  e.g: quit");
