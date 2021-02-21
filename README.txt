@@ -29,13 +29,15 @@ then restarted the board will no longer exist and will have to be recreated and 
 The persistance exists and will work however if a user creates a new channel using the same name and this will then allow all messages to be added from
 the stored txt file and read, but any client who was in the room will have to subscribe again (unless they create it in the next iteration).
 
-i.e - This example showcases the extent of the presistance.
-{   open test
+i.e - This example showcases the extent of the persistance.
+{   
+    open test
     postto test hi
     "server dies"
 
     open test
     read test
+    hi
 }
 This will return all the messages that were saved before the server failed.
 
@@ -56,3 +58,28 @@ To run the application via command line follow these steps:
     - First Run the Server using this command to run the server first:                              java Server
     - Then you can run a Client using the same command as above:                                    java Client
     - Issue all commands through the client and run as many clients as needed.
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+List of Commands and their Usages
+
+name    - Use name to set the name of your client when posting messages, follow the command with the name you would like to set
+          e.g: name Harry
+          name will only allow you to enter a name that is more than 2 characters long and is not the same as any other.
+          You can change your name as many times as you like whenever you like, changing you name will break subscriptions
+
+post    - Use post to send a message to the global message board that all clients have access to, follow the command with your message.
+          e.g: post Hello There
+
+postto  - Use postto to send a message to a specific room, this command must be followed with a room name and then your message.
+          e.g: postto friends How is everyone today?
+          This command must have an open room to post to, and the client must be subscribed to the room to be able to post to it.
+
+read    - read has two usages, the first is to read all unread messages in the global room to the client
+          e.g: read
+          The second usage is to read all unread messages in a particular room, for this command you must add the name of the room to the
+          argument. This will only work if the client is subscribed.
+          e.g: read friends
+
+open    - Opens a new Channel 
+

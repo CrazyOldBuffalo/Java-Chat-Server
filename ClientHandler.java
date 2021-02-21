@@ -101,15 +101,12 @@ public class ClientHandler extends Thread {
                     }
                 }
                 else if (command.equalsIgnoreCase("open") && argument.length() > 1) {
-                    boards.put(argument, new Board(argument, clientName));
+                    boards.put(argument, new Board(argument, this));
                     toClient.println(1);
                     toClient.println("Board " + argument + " Created");
                 }
                 else if (command.equalsIgnoreCase("sub") && argument.length() > 1) {
                         SubscribetoRoom(argument);
-                }
-                else if (command.equalsIgnoreCase("archive") || command.equalsIgnoreCase("a")) {
-                    ReadArchive();
                 }
                 else if (command.equalsIgnoreCase("help") || command.equalsIgnoreCase("h")) {
                     Help();
@@ -131,9 +128,13 @@ public class ClientHandler extends Thread {
 
     private void SubscribetoRoom(String argu) {
         if (boards.containsKey(argu)) {
-            boards.get(argu).AddClient(clientName);
+            boards.get(argu).AddClient(this);
             toClient.println(1);
             toClient.println("Board " + argu + " Subscribed");
+        }
+        else if (boards.get(argu).Subscribed(this)) {
+            toClient.println(1);
+            toClient.println("You're already Subscribed");
         }
         else {
             toClient.println(1);
@@ -142,7 +143,7 @@ public class ClientHandler extends Thread {
     }
 
     private void ReadRoomMessages(String argu) {
-        if(boards.get(argu).Subscribed(clientName)) {
+        if(boards.get(argu).Subscribed(this)) {
             ArrayList<Message> roomboard = boards.get(argu).ReadRoom();
             int roomunread = boards.get(argu).getRoomunread();
             if (roomunread == roomboard.size()) {
@@ -164,7 +165,7 @@ public class ClientHandler extends Thread {
     }
 
     private void PostToRoom(String room, String argu) throws IOException{
-        if (boards.get(room).Subscribed(clientName)) {
+        if (boards.get(room).Subscribed(this)) {
             synchronized(ClientHandler.class) {
                 boards.get(room).RoomPost(clientName, argu);
                 toClient.println(1);
@@ -175,15 +176,6 @@ public class ClientHandler extends Thread {
             toClient.println(1);
             toClient.println("You're not Subscribed, please subscribe to Post & Read to Channel " + room);
         }
-    }
-
-    private void ReadArchive() throws IOException {
-
-        toClient.println(archive.size());
-        for (Message ames : archive) {
-            toClient.println(ames.getClientName() + " Says: " + ames.getMessage() + " On [ " + ames.getDate() + " ]");
-        }
-        
     }
 
     private void Restore() throws IOException {

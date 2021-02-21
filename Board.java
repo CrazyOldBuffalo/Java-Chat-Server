@@ -10,12 +10,12 @@ import java.util.ArrayList;
 
 public class Board {
     private String boardName;
-    private static ArrayList<String> Clients = new ArrayList<>();
+    private static ArrayList<ClientHandler> Clients = new ArrayList<>();
     private static ArrayList<Message> messages = new ArrayList<>();
     private File room;
     private int roomunread = 0;
 
-    public Board(String sName, String client) {
+    public Board(String sName, ClientHandler client) {
         this.boardName = sName;
         Clients.add(client);
         room = CreateRoomFile();
@@ -28,7 +28,7 @@ public class Board {
         return new File(boardName + ".txt");
     }
 
-    public void AddClient(String client) {
+    public void AddClient(ClientHandler client) {
         Clients.add(client);
     }
 
@@ -85,8 +85,8 @@ public class Board {
         return messages;
     }
 
-    public boolean Subscribed(String ClientName) {
-        if (Clients.contains(ClientName)) {
+    public boolean Subscribed(ClientHandler clientHandler) {
+        if (Clients.contains(clientHandler)) {
             return true;
         }
         return false;
