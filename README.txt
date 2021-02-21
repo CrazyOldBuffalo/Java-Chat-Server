@@ -7,6 +7,10 @@ Created for Assignment 2 for Java Network Applications, This application allows 
 
 Contents of Application
 
-.vscode - Ignore this folder (Created by VScode for debugging files, etc)
+.vscode - Ignore this folder (Created by VScode for debugging files, etc).
 Board.java - Class for creating and storing information on rooms; such as the name, clients and messages.
-Client.java - Client used to connect to the server 
+Client.java - Client used to connect to the server and pass through information to the server through commands and arguments.
+ClientHandler - Creates a new Thread for each client when they connect to the server and handles the commands and messages for the board.
+json-simple-1.1.1.jar - Used to compile the application to be used with JSON for the messages.
+Message.java - JSON file that parses the sent messages and other information into json to be stored in the room boards and return the values when needed.
+MessageBoard
