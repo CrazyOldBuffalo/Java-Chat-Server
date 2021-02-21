@@ -66,7 +66,8 @@ List of Commands and their Usages
 name    - Use name to set the name of your client when posting messages, follow the command with the name you would like to set
           e.g: name Harry
           name will only allow you to enter a name that is more than 2 characters long and is not the same as any other.
-          You can change your name as many times as you like whenever you like, changing you name will break subscriptions
+          You can change your name as many times as you like whenever you like, the application uses a default name when not set (client)
+          please use the name command to set your name after joining the server.
 
 post    - Use post to send a message to the global message board that all clients have access to, follow the command with your message.
           e.g: post Hello There
@@ -81,5 +82,16 @@ read    - read has two usages, the first is to read all unread messages in the g
           argument. This will only work if the client is subscribed.
           e.g: read friends
 
-open    - Opens a new Channel 
+open    - Opens a new Channel to post to, name must be unique and not duplicated. Follow the command with the name of the room.
+          e.g: open mates
+          The user who creates the channel is automatically subscribed and doesn't need to use the sub command.
+
+sub     - subscribes a user to an open room so long as the room exists (or aren't already subscribed), follow the command with the room name.
+          e.g: sub mates
+
+help    - Brings up a list of these commands within the terminal
+          e.g: help
+
+quit    - Quits the application and closes all open connections
+          e.g: quit
 
