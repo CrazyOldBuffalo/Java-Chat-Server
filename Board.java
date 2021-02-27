@@ -7,13 +7,17 @@ import java.io.IOException;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Board {
     private String boardName;
     private static ArrayList<ClientHandler> Clients = new ArrayList<>();
     private static ArrayList<Message> messages = new ArrayList<>();
+    private HashMap<ClientHandler, Integer> unread = new HashMap<>();
     private File room;
     private int roomunread = 0;
+    
+
 
     public Board(String sName, ClientHandler client) {
         this.boardName = sName;
@@ -22,6 +26,7 @@ public class Board {
         if (room.exists()) {
             restoreBoard();
         }
+        unread.put(client, 0);
     }
 
     private File CreateRoomFile() {
@@ -30,6 +35,12 @@ public class Board {
 
     public void AddClient(ClientHandler client) {
         Clients.add(client);
+        unread.put(client, 0);
+    }
+
+    public void RemoveClient(ClientHandler client) {
+        unread.remove(client);
+        Clients.remove(client);
     }
 
     public void RoomPost(String clientName, String message) throws IOException {
@@ -42,12 +53,13 @@ public class Board {
         fWriter.close();
     }
 
-    public int getRoomunread() {
-        return roomunread;
+    public int getRoomunread(ClientHandler client) {
+        return unread.get(client);
     }
 
-    public void setRoomunread() {
-        roomunread = messages.size();
+    public void setRoomunread(ClientHandler client) {
+        Integer unreadvalue = unread.get(client);
+        unread.put(client, unreadvalue = messages.size());
     }
 
     private void restoreBoard() {

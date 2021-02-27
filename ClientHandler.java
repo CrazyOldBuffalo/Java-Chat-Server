@@ -41,6 +41,7 @@ public class ClientHandler extends Thread {
         return new File("main.txt");
     }
 
+    
     @Override
     public void run() {
         try {
@@ -101,12 +102,13 @@ public class ClientHandler extends Thread {
                     }
                 }
                 else if (command.equalsIgnoreCase("open") && argument.length() > 1) {
-                    boards.put(argument, new Board(argument, this));
-                    toClient.println(1);
-                    toClient.println("Board " + argument + " Created");
+                    CreateBoard(argument);
                 }
                 else if (command.equalsIgnoreCase("sub") && argument.length() > 1) {
                         SubscribetoRoom(argument);
+                }
+                else if(command.equalsIgnoreCase("unsub") && argument.length() > 1) {
+                    Unsubscribe(argument);
                 }
                 else if (command.equalsIgnoreCase("help") || command.equalsIgnoreCase("h")) {
                     Help();
@@ -123,6 +125,36 @@ public class ClientHandler extends Thread {
         } 
         catch (IOException clientHanlderIoException) {
             System.err.println("Exception while connected");
+        }
+    }
+
+    private void Unsubscribe(String argument) {
+        if (boards.containsKey(argument)) {
+            if (boards.get(argument).Subscribed(this)) {
+                boards.get(argument).RemoveClient(this);
+                toClient.println(1);
+                toClient.println("You have unsubscribed from Room: " + argument);
+            }
+            else {
+                toClient.println(1);
+                toClient.println("You're Not Subscribed to This room");
+            }
+        }
+        else {
+            toClient.println(1);
+            toClient.println("Room doesn't exist");
+        }
+    }
+
+    private void CreateBoard(String argument) {
+        if (boards.containsKey(argument)) {
+            toClient.println(1);
+            toClient.println("Board Alread Exists with this name");
+        }
+        else {
+            boards.put(argument, new Board(argument, this));
+            toClient.println(1);
+            toClient.println("Board " + argument + " Created");
         }
     }
 
@@ -145,7 +177,7 @@ public class ClientHandler extends Thread {
     private void ReadRoomMessages(String argu) {
         if(boards.get(argu).Subscribed(this)) {
             ArrayList<Message> roomboard = boards.get(argu).ReadRoom();
-            int roomunread = boards.get(argu).getRoomunread();
+            int roomunread = boards.get(argu).getRoomunread(this);
             if (roomunread == roomboard.size()) {
                 toClient.println(1);
                 toClient.println("You're Up to Date");
@@ -155,7 +187,7 @@ public class ClientHandler extends Thread {
                 for (int i = roomunread; i < roomboard.size(); i++) {
                 toClient.println(roomboard.get(i).getClientName() + " Says: " + roomboard.get(i).getMessage() + " on " + roomboard.get(i).getDate());
                 }
-                boards.get(argu).setRoomunread();
+                boards.get(argu).setRoomunread(this);
             }
         }
         else {
