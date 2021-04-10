@@ -21,7 +21,6 @@ public class ClientHandler extends Thread {
     private Server server;
     private static File file;
     private static ArrayList<Message> open = new ArrayList<>();
-    private static ArrayList<Message> archive = new ArrayList<>();
     private static ArrayList<String> clientNames = new ArrayList<>();
     private static HashMap<String, Board> boards = new HashMap<>();
 
@@ -87,6 +86,10 @@ public class ClientHandler extends Thread {
                     else if (boards.containsKey(room)) {
                         PostToRoom(room, argument);
                     }
+                    else {
+                        toClient.println(1);
+                        toClient.println("Room Doesn't exist");
+                    }
                 }
                 else if ((command.equalsIgnoreCase("read") || command.equalsIgnoreCase("r"))) {
                     if (argument.length() == 0) {
@@ -149,7 +152,7 @@ public class ClientHandler extends Thread {
     private void CreateBoard(String argument) {
         if (boards.containsKey(argument)) {
             toClient.println(1);
-            toClient.println("Board Alread Exists with this name");
+            toClient.println("Board Already Exists with this name");
         }
         else {
             boards.put(argument, new Board(argument, this));

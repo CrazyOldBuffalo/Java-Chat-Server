@@ -1,7 +1,6 @@
 import org.json.simple.*;
 
 public class Message {
-    private static final String CLASS = Message.class.getSimpleName();
     private String msg;
     private String clientName;
     private String date;
@@ -27,7 +26,6 @@ public class Message {
     @SuppressWarnings("unchecked")
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
-        json.put("_class", CLASS);
         json.put("clientName", clientName);
         json.put("Message", msg);
         json.put("Date", date);        

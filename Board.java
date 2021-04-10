@@ -15,10 +15,7 @@ public class Board {
     private static ArrayList<Message> messages = new ArrayList<>();
     private HashMap<ClientHandler, Integer> unread = new HashMap<>();
     private File room;
-    private int roomunread = 0;
     
-
-
     public Board(String sName, ClientHandler client) {
         this.boardName = sName;
         Clients.add(client);
